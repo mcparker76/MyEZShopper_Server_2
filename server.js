@@ -6,12 +6,28 @@ const LIKE = "like";
 const DISLIKE = "dislike";
 
 app.use(morgan('dev')); // log requests to the console
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var port     = process.env.PORT || 8080;
+var moment = require('moment');
+var cronJob = require('cron').CronJob;
+var myJob = new cronJob('00 00 00 * * 0-6', function(){
+	var currDate = new Date(moment().utcOffset(-300).format('MM/DD/YYYY'));
+	console.log("CURR DATE: " + currDate.getTime());
+	console.log("Month: " + (currDate.getMonth()+1));
+	console.log("Day: " + currDate.getDate());
+	console.log("Year: " + currDate.getFullYear());
 
+	Deal.find({expirationDate: {$lt:currDate}}).remove().exec();
+	/*
+	 deal.remove({expirationDate:expDate}, function(err){
+		if (err){ return handleError(err);console.log("ERROR");}
+	});*/
+});
+myJob.start();
+
+
+var port     = process.env.PORT || 8080;
 var mongoose   = require('mongoose');
 mongoose.connect('localhost:27017/MyEZShopper');
 var User = require('./app/models/user');
@@ -32,21 +48,32 @@ router.get('/', function(req, res) {
 	res.json({ message: 'hooray! welcome to MyEZShopper api!' });
 });
 
-// on routes that end in /users
+// on routes that end in /user
 // ----------------------------
 router.route('/user')
 	// create a user
 	.post(function(req, res) {
-		var user = new User();
-		user.name = req.body.name;
-		user.password = req.body.password;
-		user.email = req.body.email;
-		user.list = req.body.list;
 
-		user.save(function(err) {
+		User.find({email:req.body.email}, function(err, user) {
 			if (err)
 				res.send(err);
-			res.json({ message: 'User created!' });
+			else if (user.length > 0){
+				res.send(403)
+			}else{
+				var user = new User();
+				user.name = req.body.name;
+				user.password = req.body.password;
+				user.email = req.body.email;
+				user.list = req.body.list;//todo can this be removed???????????
+				user.save(function(err, user) {
+					if (err){
+						res.send(err);
+					}
+					else{
+						res.json(user);
+					}
+				});
+			}
 		});
 	})
 
@@ -102,7 +129,7 @@ router.route('/user/login')
 	.post(function(req, res) {
 		User.find({email:req.body.email, password:req.body.password}, function(err, user){
 			if (err){
-				res.send(err);
+				res.send(400);
 			}
 			else if (user.length == 0){
 				res.send(400);
@@ -131,6 +158,7 @@ router.route('/deal')
 		deal.location = req.body.location;
 		deal.expirationDate = req.body.expirationDate;
 		deal.category = req.body.category;
+		deal.description = req.body.description;
 
 		deal.save(function(err) {
 			if (err)
@@ -145,6 +173,114 @@ router.route('/deal')
 			if (err)
 				res.send(err);
 			res.json(deals);
+		});
+	});
+
+// on routes that end in /deal/search/name/:query
+// ----------------------------
+router.route('/deal/search/name/:query_value')
+	// search for a deal
+	.get(function(req, res){
+		var tokens = req.params.query_value.split('+');
+		var qv = "";
+		for (index in tokens){
+			qv += tokens[index] + ' ';
+		}
+		//trim off last space
+		qv = qv.substring(0, qv.length - 1);
+
+		Deal.find({name:qv}, function(err, deals){
+			if (err){
+				console.log("ERROR");
+				res.send(400);
+			}
+			else if (deals.length == 0){
+				console.log("NO DEALS");
+				res.send(404);
+			}else{
+				res.json(deals);
+			}
+		});
+	});
+
+// on routes that end in /deal/search/location/:query
+// ----------------------------
+router.route('/deal/search/location/:query_value')
+	// search for a deal
+	.get(function(req, res){
+		var tokens = req.params.query_value.split('+');
+		var qv = "";
+		for (index in tokens){
+			qv += tokens[index] + ' ';
+		}
+		//trim off last space
+		qv = qv.substring(0, qv.length - 1);
+
+		Deal.find({location:qv}, function(err, deals){
+			if (err){
+				console.log("ERROR");
+				res.send(400);
+			}
+			else if (deals.length == 0){
+				console.log("NO DEALS");
+				res.send(404);
+			}else{
+				res.json(deals);
+			}
+		});
+	});
+
+// on routes that end in /deal/search/storename/:query
+// ----------------------------
+router.route('/deal/search/storename/:query_value')
+	// search for a deal
+	.get(function(req, res){
+		var tokens = req.params.query_value.split('+');
+		var qv = "";
+		for (index in tokens){
+			qv += tokens[index] + ' ';
+		}
+		//trim off last space
+		qv = qv.substring(0, qv.length - 1);
+
+		Deal.find({storeName:qv}, function(err, deals){
+			if (err){
+				console.log("ERROR");
+				res.send(400);
+			}
+			else if (deals.length == 0){
+				console.log("NO DEALS");
+				res.send(404);
+			}else{
+				res.json(deals);
+			}
+		});
+	});
+
+// on routes that end in /deal/search/category/:query
+// ----------------------------
+router.route('/deal/search/category/:query_value')
+	// search for a deal
+	.get(function(req, res){
+		var tokens = req.params.query_value.split('+');
+		var qv = "";
+		for (index in tokens){
+			qv += tokens[index] + ' ';
+		}
+		//trim off last space
+		qv = qv.substring(0, qv.length - 1);
+
+		Deal.find({category:qv}, function(err, deals){
+			if (err){
+				console.log("ERROR");
+				res.send(400);
+			}
+			else if (deals.length == 0){
+				console.log("NO DEALS");
+				res.send(404);
+			}else{
+				res.json(deals);
+			}
 		});
 	});
 

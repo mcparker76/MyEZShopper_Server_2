@@ -14,6 +14,8 @@
     "express": "~4.0.0",
     "morgan": "~1.0.0",
     "mongoose": "~3.6.13",
-    "body-parser": "~1.0.1"
+    "body-parser": "~1.0.1",
+    "cron": "~1.0.0",
+    "moment": "~2.10.6"
   }
 }
