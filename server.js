@@ -159,6 +159,8 @@ router.route('/deal')
 		deal.expirationDate = req.body.expirationDate;
 		deal.category = req.body.category;
 		deal.description = req.body.description;
+		deal.likeCount = 0;
+		deal.dislikeCount = 0;
 
 		deal.save(function(err) {
 			if (err)
@@ -332,7 +334,7 @@ router.route('/deal/like/:deal_id')
 		if (type == LIKE){
 			Deal.count({_id: dealId, likes: user}, function(err, count){
 				if (count > 0){
-					res.json({message:"You already like this"});
+					res.send(409);
 				}else{
 					//do you already dislike it?
 					Deal.count({_id: dealId, dislikes: user}, function(err, count){
@@ -342,7 +344,7 @@ router.route('/deal/like/:deal_id')
 								if (err) {
 									res.send(err);
 								}else{
-									res.json({message:'changed to like'});
+									res.json(deal);
 								}
 							});
 						}else{
@@ -351,7 +353,7 @@ router.route('/deal/like/:deal_id')
 								if (err) {
 									res.send(err);
 								}else{
-									res.json({message:'like updated'});
+									res.json(deal);
 								}
 							});
 						}
@@ -361,7 +363,7 @@ router.route('/deal/like/:deal_id')
 		}else if (type == DISLIKE){
 			Deal.count({_id: dealId, dislikes: user}, function(err, count){
 				if (count > 0){
-					res.json({message:"You already dislike this"});
+					res.send(409);
 				}else{
 					//do you already like it?
 					Deal.count({_id: dealId, likes: user}, function(err, count){
@@ -371,7 +373,7 @@ router.route('/deal/like/:deal_id')
 								if (err) {
 									res.send(err);
 								}else{
-									res.json({message:'changed to dislike'});
+									res.json(deal);
 								}
 							});
 						}else{
@@ -380,7 +382,7 @@ router.route('/deal/like/:deal_id')
 								if (err) {
 									res.send(err);
 								}else{
-									res.json({message:'Dislike updated'});
+									res.json(deal);
 								}
 							});
 						}
