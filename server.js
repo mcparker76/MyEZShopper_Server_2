@@ -344,7 +344,10 @@ router.route('/deal/like/:deal_id')
 								if (err) {
 									res.send(err);
 								}else{
-									res.json(deal);
+									var d = deal.toObject();
+									d["voteChanged"] = "true";
+									console.log(d.voteChanged);
+									res.json(d);
 								}
 							});
 						}else{
@@ -353,7 +356,10 @@ router.route('/deal/like/:deal_id')
 								if (err) {
 									res.send(err);
 								}else{
-									res.json(deal);
+									var d = deal.toObject();
+									d["voteChanged"] = "false";
+									console.log(d.voteChanged);
+									res.json(d);
 								}
 							});
 						}
@@ -373,7 +379,10 @@ router.route('/deal/like/:deal_id')
 								if (err) {
 									res.send(err);
 								}else{
-									res.json(deal);
+									var d = deal.toObject();
+									d["voteChanged"] = "true";
+									console.log(d.voteChanged);
+									res.json(d);
 								}
 							});
 						}else{
@@ -382,7 +391,10 @@ router.route('/deal/like/:deal_id')
 								if (err) {
 									res.send(err);
 								}else{
-									res.json(deal);
+									var d = deal.toObject();
+									d["voteChanged"] = "false";
+									console.log(d.voteChanged);
+									res.json(d);
 								}
 							});
 						}
