@@ -22,9 +22,8 @@ var myJob = new cronJob('00 00 05 * * 1-7', function(){
 });
 myJob.start();
 
-
-var port     = process.env.PORT || 8080;
-var mongoose   = require('mongoose');
+var port = process.env.PORT || 8080;
+var mongoose = require('mongoose');
 mongoose.connect('localhost:27017/MyEZShopper');
 var User = require('./app/models/user');
 var Deal = require('./app/models/deal');
