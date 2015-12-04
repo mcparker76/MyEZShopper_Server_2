@@ -8,16 +8,12 @@ const DISLIKE = "dislike";
 app.use(morgan('dev')); // log requests to the console
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 var moment = require('moment');
-var cronJob = require('cron').CronJob;
-var myJob = new cronJob('00 00 00 * * 0-6', function(){
-	var currDate = new Date(moment().utcOffset(-300).format('MM/DD/YYYY'));
-	console.log("CURR DATE: " + currDate.getTime());
-	console.log("Month: " + (currDate.getMonth()+1));
-	console.log("Day: " + currDate.getDate());
-	console.log("Year: " + currDate.getFullYear());
 
+var cronJob = require('cron').CronJob;
+//Delete deals that expire at 12:00 AM EST (equivalent to 5:00 UTC)
+var myJob = new cronJob('00 00 05 * * 1-7', function(){
+	var currDate = new Date(moment().utcOffset(-300).format('MM/DD/YYYY'));
 	Deal.find({expirationDate: {$lt:currDate}}).remove().exec();
 	/*
 	 deal.remove({expirationDate:expDate}, function(err){
@@ -42,10 +38,6 @@ router.use(function(req, res, next) {
 	// do logging
 	console.log('Something is happening.');
 	next();
-});
-
-router.get('/', function(req, res) {
-	res.json({ message: 'hooray! welcome to MyEZShopper api!' });
 });
 
 // on routes that end in /user
@@ -103,7 +95,6 @@ router.route('/user/:user_id')
 		User.findByIdAndUpdate(req.params.user_id, req.body, function(err, user) {
 			console.log(req.body);
 			if (err) {
-				console.log("ERROR");
 				res.send(err);
 			}else{
 				res.json({message:'User updated'});
@@ -134,7 +125,6 @@ router.route('/user/login')
 			else if (user.length == 0){
 				res.send(400);
 			}else{
-				console.log("ID "+ user);
 				res.json(user);
 			}
 		});
@@ -208,11 +198,9 @@ router.route('/deal/search/name/:query_value')
 
 		Deal.find({name:qv}, function(err, deals){
 			if (err){
-				console.log("ERROR");
 				res.send(400);
 			}
 			else if (deals.length == 0){
-				console.log("NO DEALS");
 				res.send(404);
 			}else{
 				res.json(deals);
@@ -235,11 +223,9 @@ router.route('/deal/search/location/:query_value')
 
 		Deal.find({location:qv}, function(err, deals){
 			if (err){
-				console.log("ERROR");
 				res.send(400);
 			}
 			else if (deals.length == 0){
-				console.log("NO DEALS");
 				res.send(404);
 			}else{
 				res.json(deals);
@@ -262,11 +248,9 @@ router.route('/deal/search/storename/:query_value')
 
 		Deal.find({storeName:qv}, function(err, deals){
 			if (err){
-				console.log("ERROR");
 				res.send(400);
 			}
 			else if (deals.length == 0){
-				console.log("NO DEALS");
 				res.send(404);
 			}else{
 				res.json(deals);
@@ -289,11 +273,9 @@ router.route('/deal/search/category/:query_value')
 
 		Deal.find({category:qv}, function(err, deals){
 			if (err){
-				console.log("ERROR");
 				res.send(400);
 			}
 			else if (deals.length == 0){
-				console.log("NO DEALS");
 				res.send(404);
 			}else{
 				res.json(deals);
@@ -318,7 +300,6 @@ router.route('/deal/:deal_id')
 		Deal.findByIdAndUpdate(req.params.deal_id, req.body, function(err, deal) {
 			console.log(req.body);
 			if (err) {
-				console.log("ERROR");
 				res.send(err);
 			}else{
 				res.json({message:'Deal updated'});
@@ -361,7 +342,6 @@ router.route('/deal/like/:deal_id')
 								}else{
 									var d = deal.toObject();
 									d["voteChanged"] = "true";
-									console.log(d.voteChanged);
 									res.json(d);
 								}
 							});
@@ -373,7 +353,6 @@ router.route('/deal/like/:deal_id')
 								}else{
 									var d = deal.toObject();
 									d["voteChanged"] = "false";
-									console.log(d.voteChanged);
 									res.json(d);
 								}
 							});
@@ -396,7 +375,6 @@ router.route('/deal/like/:deal_id')
 								}else{
 									var d = deal.toObject();
 									d["voteChanged"] = "true";
-									console.log(d.voteChanged);
 									res.json(d);
 								}
 							});
@@ -408,7 +386,6 @@ router.route('/deal/like/:deal_id')
 								}else{
 									var d = deal.toObject();
 									d["voteChanged"] = "false";
-									console.log(d.voteChanged);
 									res.json(d);
 								}
 							});
@@ -426,4 +403,3 @@ app.use('/api', router);
 // START THE SERVER
 // =============================================================================
 app.listen(port);
-console.log('Magic happens on port ' + port);
