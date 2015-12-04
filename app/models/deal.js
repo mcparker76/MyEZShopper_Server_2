@@ -9,6 +9,7 @@ var DealSchema = new Schema({
     expirationDate : Date,
     description : String,
     category : String,
+    userId: String,
     likeCount : Number,
     dislikeCount : Number,
     likes : [],

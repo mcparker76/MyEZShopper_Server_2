@@ -151,21 +151,36 @@ router.route('/user/login')
 router.route('/deal')
 	// add a deal
 	.post(function(req, res) {
-		var deal = new Deal();
-		deal.name = req.body.name;
-		deal.price = req.body.price;
-		deal.storeName = req.body.storeName;
-		deal.location = req.body.location;
-		deal.expirationDate = req.body.expirationDate;
-		deal.category = req.body.category;
-		deal.description = req.body.description;
-		deal.likeCount = 0;
-		deal.dislikeCount = 0;
 
-		deal.save(function(err) {
-			if (err)
+		var newDeal = {};
+		newDeal["name"] = req.body.name;
+		newDeal["userId"] = req.body.userId;
+		newDeal["storeName"] = req.body.storeName;
+
+		Deal.find(newDeal, function(err, deal){
+			if (err){
 				res.send(err);
-			res.json({ message: 'Deal Added!' });
+			}else if (deal.length > 0){
+				res.send(403);
+			}else{
+				var deal = new Deal();
+				deal.name = req.body.name;
+				deal.price = req.body.price;
+				deal.storeName = req.body.storeName;
+				deal.location = req.body.location;
+				deal.expirationDate = req.body.expirationDate;
+				deal.category = req.body.category;
+				deal.description = req.body.description;
+				deal.userId = req.body.userId;
+				deal.likeCount = 0;
+				deal.dislikeCount = 0;
+
+				deal.save(function(err) {
+					if (err)
+						res.send(err);
+					res.json({ message: 'Deal Added!' });
+				});
+			}
 		});
 	})
 
@@ -206,7 +221,7 @@ router.route('/deal/search/name/:query_value')
 	});
 
 // on routes that end in /deal/search/location/:query
-// ----------------------------
+// -------------------------------------------------
 router.route('/deal/search/location/:query_value')
 	// search for a deal
 	.get(function(req, res){
