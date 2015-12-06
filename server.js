@@ -11,8 +11,8 @@ app.use(bodyParser.json());
 var moment = require('moment');
 
 var cronJob = require('cron').CronJob;
-//Delete deals that expire at 12:00 AM EST (equivalent to 5:00 UTC)
-var myJob = new cronJob('00 00 05 * * 1-7', function(){
+//Delete deals that expire at 12:00 AM EST (equivalent to 5:00 AM UTC)
+var myJob = new cronJob('00 00 05 * * 0-6', function(){
 	var currDate = new Date(moment().utcOffset(-300).format('MM/DD/YYYY'));
 	Deal.find({expirationDate: {$lt:currDate}}).remove().exec();
 	/*
