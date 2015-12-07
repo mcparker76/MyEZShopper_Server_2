@@ -9,14 +9,13 @@ app.use(morgan('dev')); // log requests to the console
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 var moment = require('moment');
-var theDate = new Date(moment().utcOffset(-300).format('MM/DD/YYYY'));
-console.log(theDate.getHours());
 
 var cronJob = require('cron').CronJob;
 //Delete deals that expire at 12:00 AM EST (equivalent to 5:00 AM UTC)
 var myJob = new cronJob('00 00 05 * * 0-6', function(){
+	console.log("CRON JOB EXECUTING");
 	var currDate = new Date(moment().utcOffset(-300).format('MM/DD/YYYY'));
-	Deal.find({expirationDate: {$lt:currDate}}).remove().exec();
+	Deal.find({expirationDate: {$gt:currDate}}).remove().exec();
 });
 myJob.start();
 
@@ -53,7 +52,7 @@ router.route('/user')
 				user.name = req.body.name;
 				user.password = req.body.password;
 				user.email = req.body.email;
-				user.list = req.body.list;//todo can this be removed???????????
+				user.list = [];
 				user.save(function(err, user) {
 					if (err){
 						res.send(err);
